@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
-import { MDXProvider } from "@mdx-js/react"
-import { StaticQuery, graphql } from 'gatsby'
+import { MDXProvider } from "@mdx-js/react";
+import { StaticQuery, graphql } from 'gatsby';
+import { MDXRenderer } from "gatsby-plugin-mdx";
 
 import Header from './header';
 import './layout.css';
@@ -15,44 +16,49 @@ function H1({ children }) {
   )
 }
 
-const Layout = (props) => (
-  <StaticQuery
-    query={graphql`
-      query SiteTitleQuery {
-        site {
-          siteMetadata {
-            title
-          }
-        }
+function Wrapper() {
+  return <p>Thing</p>
+}
+
+function AnotherComponent() {
+  return (
+    <p>Just another component.</p>
+  );
+}
+
+export const pageQuery = graphql`
+  query BlogPostQuery($id: String) {
+    mdx(id: { eq: $id }) {
+      id
+      body
+      frontmatter {
+        title
       }
-    `}
-    render={data => (
-      <>
-        <Header siteTitle={data.site.siteMetadata.title} />
-        <div
-          style={{
-            margin: '0 auto',
-            maxWidth: 960,
-            padding: '0px 1.0875rem 1.45rem',
-            paddingTop: 0,
-          }}
-        >
-          <MDXProvider
-            components={{
-              h1: H1,
-              wrapper: ({ children, ...props }) => {
-                console.log(props, children)
-                const reversedChildren = React.Children.toArray(children).reverse()
-                return <>{reversedChildren}</>
-              }
-            }}
-          >
-            {props.children}
-          </MDXProvider>
-        </div>
-      </>
-    )}
-  />
+    }
+  }
+`
+
+const Layout = ({ data: { mdx } }) => (
+  <>
+    <div
+      style={{
+        margin: '0 auto',
+        maxWidth: 960,
+        padding: '0px 1.0875rem 1.45rem',
+        paddingTop: 0,
+      }}
+    >
+      <MDXProvider
+        components={{
+          h1: H1,
+          wrapper: Wrapper,
+          AnotherComponent,
+        }}
+      >
+        <MDXRenderer>{mdx.body}</MDXRenderer>
+      </MDXProvider>
+    </div>
+  </>
 )
 
 Layout.propTypes = {
