@@ -1,4 +1,116 @@
 ---
 title: Blog Post 1
 ---
-Trying out MDX
+
+# The Big Title 
+
+A lot of ideas here has been borrowed from the [Values vs References](https://blog.agney.dev/value-vs-reference/) article in [JavaScript concepts series](https://dev.to/boywithsilverwings/scopes-and-closures-javascript-concepts-4dfj)
+
+There has been a lot of talk on let vs const debate already. In this article, I want to look at two keywords that have been an integral part of this debate. Knowing these, I hope you can also choose your own side in the debate. 
+
+Ignoring legacy `var` declaration, there are two major ways of declaring variables in JavaScript - `let` and `const`. 
+
+Variables defined with `const` cannot be reassinged.
+
+```
+const a = 1;
+a = 2; // This is reassignment & will throw an error.
+```
+
+Reassignment consists of assigning a new value for a variable using the `=` operator. This restriction on the part of `const` also leads to another: It must have a value at the time of declaration. Because reassignment is forbidden, you can see that a variable declared to be `undefined` would forever be undefined in it's scope. So, it does not make sense to declare it in the first place. 
+
+Before we talk about mutations, we have to take a slight detour towards types in JavaScript. 
+
+## Types
+
+Values can be of type:
+
+1. Primitives
+2. Objects
+
+[Primitives](https://developer.mozilla.org/en-US/docs/Glossary/Primitive) are futher subdivided to string, number, bigint, boolean, null, undefined and symbol. 
+
+> You don't need to know all of these to continue this article, I'm just listing them here for completeness.
+
+Objects are everything else: Objects, Arrays, Functions...
+
+One example of this implementation would be that arrays are just normal objects with just integers as keys and extra functions on it. Each of these have restrictions and extra functionalities all build on the native JavaScript object. 
+
+But do note the point that I did not say variables have these types, it is the values that have these types. So, what you have to do is to consider variables as pointers to these values in memory. 
+
+## Reassignment
+
+```javascript
+let a = 1;
+a = 2;
+```
+
+Here `a` is a variable pointing into the memory containing `1` as value. When `a` is reassigned to another value, `2`, then the variable points to a different place. This holds true with every primitive there is, and for reassignment also for objects.
+
+```javascript
+let person1 = {
+  name: "joe"
+}
+person1 = {
+  name: "jose"
+}
+```
+`person1` the first object in memory and then the second object.
+
+## Mutation
+
+However, if you had choosen to assign the variable to another, the memory representation would have been different.
+
+```javascript
+const person = {
+  name: 'john',
+};
+const developer = person;
+```
+
+![developer and person variable pointing at the same object reference in memory](https://thepracticaldev.s3.amazonaws.com/i/h8t19v4iqqmdv5obs9j9.png)
+
+Now, from the memory representation you might be easily figure what would happen when a property of `developer` is changed:
+
+```javascript
+const person = {
+  name: 'john',
+};
+const developer = person;
+developer.name = "10x John"
+```
+
+Now, even though you have just changed the name of `developer` because of the fact that `person` is pointing to the same object it is also changed. This behavior holds for arrays or other data types that share the Object prototype. 
+
+Note that I'm using `const` for declaring the variable, but even then there are no errors that are thrown. 
+
+This is why people are angry at `const`, it prevents reassignment and not mutation. If you think you don't mutate, do know that there are some functions in javascript that changes the data structure you are operating on (mutation). Some of these are `push` or `sort` in case of arrays. (See [Immutable Array Operations](https://dev.to/boywithsilverwings/immutable-array-operations-javascript-3n2p))
+
+## Minimum Responsibility 
+
+Some people believe that variables should only be given their minimum responsibilities. Whether this is in the [scope they are declared in](https://dev.to/boywithsilverwings/scopes-and-closures-javascript-concepts-4dfj) or whether they can be reassigned or not. 
+
+If you are hell bent on using `const` in all places, you would write something like:
+
+```javascript
+let weekend = false;
+if(day === 0 || day === 6) {
+  weekend = true;
+}
+
+// transformed to:
+const weekend = (() => {
+  if(day === 0 || day === 6) {
+    return true;
+  }
+  return false;
+})();
+```
+Obviously, this is a choice that you and your team need to make on variables. If you are choosing to go `const` all the way, you will need to make a note of it and why you are doing it in the style guide and write docs for junior programmers joining your team with solutions to common problems they might encounter.
+
+If you want to go `let` all the way and avoid the confusion with `const` all together that's fine too.
+
+If you don't care, well more power to you. ✌️
+
+> You can find me on [Twitter](https://twitter.com/agneymenon) or [Subscribe to my newsletter](https://blog.agney.dev/) if you want to stay updated. Thanks.
+

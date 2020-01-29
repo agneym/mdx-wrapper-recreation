@@ -1,10 +1,9 @@
 import React, { Fragment } from 'react'
-import PropTypes from 'prop-types'
 import { MDXProvider } from "@mdx-js/react";
-import { StaticQuery, graphql } from 'gatsby';
+import { graphql } from 'gatsby';
 import { MDXRenderer } from "gatsby-plugin-mdx";
+import { useTrail, animated } from "react-spring";
 
-import Header from './header';
 import './layout.css';
 
 function H1({ children }) {
@@ -16,8 +15,16 @@ function H1({ children }) {
   )
 }
 
-function Wrapper() {
-  return <p>Thing</p>
+function Wrapper({ children }) {
+  const childrenArray = React.Children.toArray(children);
+  const trail = useTrail(childrenArray.length, {
+    y: 0,
+    opacity: 1,
+    from: { y: 50, opacity: 0 },
+  });
+  return trail.map(({ y, opacity }, index) =>
+    <animated.div key={index} style={{ opacity, transform: y.interpolate(y => `translate3d(0,${y}px,0)`) }}>{childrenArray[index]}</animated.div>
+  )
 }
 
 function AnotherComponent() {
@@ -42,7 +49,7 @@ const Layout = ({ data: { mdx } }) => (
   <>
     <div
       style={{
-        margin: '0 auto',
+        margin: '50px auto',
         maxWidth: 960,
         padding: '0px 1.0875rem 1.45rem',
         paddingTop: 0,
@@ -60,9 +67,5 @@ const Layout = ({ data: { mdx } }) => (
     </div>
   </>
 )
-
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
-}
 
 export default Layout
